@@ -1,0 +1,4 @@
+package: backend
+generate:
+  client: true
+output: infrastructure/externalapi/backend/client.gen.go

@@ -1,0 +1,4 @@
+package: backend
+generate:
+  models: true
+output: infrastructure/externalapi/backend/models.gen.go
