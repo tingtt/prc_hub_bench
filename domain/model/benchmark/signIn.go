@@ -5,8 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"prc_hub_bench/infrastructure/externalapi/backend"
 	"time"
+
+	"github.com/tingtt/prc_hub_bench/infrastructure/externalapi/backend"
 )
 
 func signIn(c *backend.Client, b backend.LoginBody, wantedStatusCode int) (d time.Duration, token string, err error) {

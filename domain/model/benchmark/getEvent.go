@@ -3,8 +3,9 @@ package benchmark
 import (
 	"context"
 	"fmt"
-	"prc_hub_bench/infrastructure/externalapi/backend"
 	"time"
+
+	"github.com/tingtt/prc_hub_bench/infrastructure/externalapi/backend"
 )
 
 func getEvent(c *backend.Client, id int64, p backend.GetEventsIdParams, wantedStatusCode int) (d time.Duration, err error) {

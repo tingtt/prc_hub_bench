@@ -2,8 +2,9 @@ package marshaler_json
 
 import (
 	"encoding/json"
-	"prc_hub_bench/domain/model/benchmark"
-	"prc_hub_bench/presentation"
+
+	"github.com/tingtt/prc_hub_bench/domain/model/benchmark"
+	"github.com/tingtt/prc_hub_bench/presentation"
 )
 
 func New(indent string) presentation.IMarshaler {

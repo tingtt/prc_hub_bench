@@ -1,9 +1,10 @@
 package benchmark
 
 import (
-	"prc_hub_bench/domain/model/benchmark"
-	"prc_hub_bench/infrastructure/externalapi/backend"
 	"time"
+
+	"github.com/tingtt/prc_hub_bench/domain/model/benchmark"
+	"github.com/tingtt/prc_hub_bench/infrastructure/externalapi/backend"
 )
 
 type Result = benchmark.Result

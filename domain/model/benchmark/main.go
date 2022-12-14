@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
-	"prc_hub_bench/infrastructure/externalapi/backend"
 	"time"
+
+	"github.com/tingtt/prc_hub_bench/infrastructure/externalapi/backend"
 
 	"github.com/goombaio/namegenerator"
 )

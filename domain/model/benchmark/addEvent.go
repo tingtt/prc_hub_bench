@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"prc_hub_bench/infrastructure/externalapi/backend"
 	"time"
+
+	"github.com/tingtt/prc_hub_bench/infrastructure/externalapi/backend"
 )
 
 func addEvent(c *backend.Client, bearer string, b backend.PostEventsJSONRequestBody, wantedStatusCode int) (d time.Duration, err error) {

@@ -1,8 +1,8 @@
 package marshaler_yaml
 
 import (
-	"prc_hub_bench/domain/model/benchmark"
-	"prc_hub_bench/presentation"
+	"github.com/tingtt/prc_hub_bench/domain/model/benchmark"
+	"github.com/tingtt/prc_hub_bench/presentation"
 
 	"github.com/go-yaml/yaml"
 )

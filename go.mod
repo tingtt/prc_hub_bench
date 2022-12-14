@@ -1,4 +1,4 @@
-module prc_hub_bench
+module github.com/tingtt/prc_hub_bench
 
 go 1.19
 

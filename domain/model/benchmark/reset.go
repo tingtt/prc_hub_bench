@@ -3,8 +3,9 @@ package benchmark
 import (
 	"context"
 	"fmt"
-	"prc_hub_bench/infrastructure/externalapi/backend"
 	"time"
+
+	"github.com/tingtt/prc_hub_bench/infrastructure/externalapi/backend"
 )
 
 func reset(c *backend.Client) (d time.Duration, err error) {

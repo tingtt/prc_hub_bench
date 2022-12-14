@@ -5,10 +5,10 @@ import (
 	"os"
 	"time"
 
-	"prc_hub_bench/application/benchmark"
-	"prc_hub_bench/infrastructure/externalapi/backend"
-	"prc_hub_bench/presentation/marshaler_json"
-	"prc_hub_bench/presentation/marshaler_yaml"
+	"github.com/tingtt/prc_hub_bench/application/benchmark"
+	"github.com/tingtt/prc_hub_bench/infrastructure/externalapi/backend"
+	"github.com/tingtt/prc_hub_bench/presentation/marshaler_json"
+	"github.com/tingtt/prc_hub_bench/presentation/marshaler_yaml"
 
 	flags "github.com/jessevdk/go-flags"
 )

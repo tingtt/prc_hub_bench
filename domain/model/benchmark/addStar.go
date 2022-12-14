@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
-	"prc_hub_bench/infrastructure/externalapi/backend"
 	"time"
+
+	"github.com/tingtt/prc_hub_bench/infrastructure/externalapi/backend"
 )
 
 func addStar(c *backend.Client, userId int64, wantedStatusCode int) (d time.Duration, err error) {
