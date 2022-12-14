@@ -14,7 +14,7 @@ func reset(c *backend.Client) (d time.Duration, err error) {
 	d = time.Since(start)
 
 	// Check status code
-	if err == nil {
+	if err != nil {
 		return
 	}
 	if r.StatusCode != 200 {
