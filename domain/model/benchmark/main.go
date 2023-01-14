@@ -22,7 +22,7 @@ type Log struct {
 	Duration string `json:"duration" yaml:"duration"`
 }
 
-func Run(c *backend.Client, d time.Duration) (r Result) {
+func Run(c *backend.Client, d time.Duration, o struct{ Verbose bool }) (r Result) {
 	d2, err := reset(c)
 	if err != nil {
 		r.Error = err.Error()
@@ -46,7 +46,7 @@ func Run(c *backend.Client, d time.Duration) (r Result) {
 	)
 	nameGenerator := namegenerator.NewNameGenerator(time.Now().UTC().UnixNano())
 
-	multiRequests(&r, d,
+	multiRequests(&r, d, o,
 		req{
 			Name: "POST /users/sign_in",
 			Req: func() (d time.Duration, err error) {
@@ -133,7 +133,7 @@ type req struct {
 	Point uint
 }
 
-func request(r *Result, d *time.Duration, req req) {
+func request(r *Result, d *time.Duration, req req, o struct{ Verbose bool }) {
 	// Execute request and get duration
 	d2, err := req.Req()
 	if err != nil {
@@ -152,14 +152,16 @@ func request(r *Result, d *time.Duration, req req) {
 		req.Name,
 		fmt.Sprintf("%d ms", d2.Abs().Milliseconds()),
 	})
-	fmt.Printf("%v\n", Log{req.Name, fmt.Sprintf("%d ms", d2.Abs().Milliseconds())})
+	if o.Verbose {
+		fmt.Printf("%v\n", Log{req.Name, fmt.Sprintf("%d ms", d2.Abs().Milliseconds())})
+	}
 	// Add score point
 	r.Score += uint64(req.Point)
 }
 
-func loopRequest(r *Result, d *time.Duration, req req) {
+func loopRequest(r *Result, d *time.Duration, req req, o struct{ Verbose bool }) {
 	for i := 0; true; i++ {
-		request(r, d, req)
+		request(r, d, req, o)
 		if i%20 == 0 {
 			req.Point += 1
 		}
@@ -171,9 +173,9 @@ func loopRequest(r *Result, d *time.Duration, req req) {
 	}
 }
 
-func multiRequests(r *Result, d time.Duration, rr ...req) {
+func multiRequests(r *Result, d time.Duration, o struct{ Verbose bool }, rr ...req) {
 	for _, req := range rr {
-		go loopRequest(r, &d, req)
+		go loopRequest(r, &d, req, o)
 	}
 	for {
 		if r.Error != "" || d <= 0 {
