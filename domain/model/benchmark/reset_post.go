@@ -8,7 +8,7 @@ import (
 	"github.com/tingtt/prc_hub_bench/infrastructure/externalapi/backend"
 )
 
-func reset(c *backend.Client) (d time.Duration, err error) {
+func ResetPost(c *backend.Client) (d time.Duration, err error) {
 	// Request
 	start := time.Now()
 	r, err := c.PostReset(context.Background())

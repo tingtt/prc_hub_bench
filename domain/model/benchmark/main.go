@@ -23,7 +23,7 @@ type Log struct {
 }
 
 func Run(c *backend.Client, d time.Duration, o struct{ Verbose bool }) (r Result) {
-	d2, err := reset(c)
+	d2, err := ResetPost(c)
 	if err != nil {
 		r.Error = err.Error()
 		return
@@ -35,7 +35,7 @@ func Run(c *backend.Client, d time.Duration, o struct{ Verbose bool }) (r Result
 
 	LOGIN_USER := backend.LoginBody{Email: "throbbing-pond@prchub.com", Password: "throbbing-pond"}
 	var TOKEN string
-	d2, TOKEN, err = signIn(c, LOGIN_USER, 200)
+	d2, TOKEN, err = UsersSignInPost(c, LOGIN_USER, 200)
 	if err != nil {
 		r.Error = err.Error()
 		return
@@ -50,7 +50,7 @@ func Run(c *backend.Client, d time.Duration, o struct{ Verbose bool }) (r Result
 		req{
 			Name: "POST /users/sign_in",
 			Req: func() (d time.Duration, err error) {
-				d, TOKEN, err = signIn(c, LOGIN_USER, 200)
+				d, TOKEN, err = UsersSignInPost(c, LOGIN_USER, 200)
 				return d, err
 			},
 			Point: 2,
@@ -58,7 +58,7 @@ func Run(c *backend.Client, d time.Duration, o struct{ Verbose bool }) (r Result
 		req{
 			Name: "GET /events?embed=uesr&embed=documents",
 			Req: func() (time.Duration, error) {
-				return getEvents(c,
+				return EventsGet(c,
 					backend.GetEventsParams{
 						Embed: &[]string{"user", "documents"},
 					},
@@ -70,7 +70,7 @@ func Run(c *backend.Client, d time.Duration, o struct{ Verbose bool }) (r Result
 		req{
 			Name: "GET /events/:id?embed=uesr&embed=documents",
 			Req: func() (time.Duration, error) {
-				return getEvent(c,
+				return EventsIdGet(c,
 					rand.Int63n(99)+1,
 					backend.GetEventsIdParams{
 						Embed: &[]string{"user", "documents"},
@@ -85,7 +85,7 @@ func Run(c *backend.Client, d time.Duration, o struct{ Verbose bool }) (r Result
 			Req: func() (time.Duration, error) {
 				name := nameGenerator.Generate()
 				tmpBool := true
-				return addEvent(c,
+				return EventsPost(c,
 					TOKEN,
 					backend.CreateEventBody{
 						Datetimes: &[]backend.CreateEventDatetime{{
@@ -111,14 +111,14 @@ func Run(c *backend.Client, d time.Duration, o struct{ Verbose bool }) (r Result
 		req{
 			Name: "GET /users",
 			Req: func() (time.Duration, error) {
-				return getUsers(c, TOKEN, http.StatusOK)
+				return UsersGet(c, TOKEN, http.StatusOK)
 			},
 			Point: 5,
 		},
 		req{
 			Name: "POST /users/:id/star",
 			Req: func() (time.Duration, error) {
-				return addStar(c, rand.Int63n(99)+1, http.StatusOK)
+				return UsersIdStarPost(c, rand.Int63n(99)+1, http.StatusOK)
 			},
 			Point: 3,
 		},

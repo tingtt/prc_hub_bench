@@ -9,7 +9,7 @@ import (
 	"github.com/tingtt/prc_hub_bench/infrastructure/externalapi/backend"
 )
 
-func addStar(c *backend.Client, userId int64, wantedStatusCode int) (d time.Duration, err error) {
+func UsersIdStarPost(c *backend.Client, userId int64, wantedStatusCode int) (d time.Duration, err error) {
 	start := time.Now()
 
 	r, err := c.PostUsersIdStar(context.Background(), rand.Int63n(99)+1)

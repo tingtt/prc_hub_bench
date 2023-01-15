@@ -8,11 +8,12 @@ import (
 	"github.com/tingtt/prc_hub_bench/infrastructure/externalapi/backend"
 )
 
-func getEvents(c *backend.Client, p backend.GetEventsParams, wantedStatusCode int) (d time.Duration, err error) {
+func EventsIdGet(c *backend.Client, id int64, p backend.GetEventsIdParams, wantedStatusCode int) (d time.Duration, err error) {
 	start := time.Now()
 
-	r, err := c.GetEvents(
+	r, err := c.GetEventsId(
 		context.Background(),
+		id,
 		&p,
 	)
 
@@ -22,7 +23,7 @@ func getEvents(c *backend.Client, p backend.GetEventsParams, wantedStatusCode in
 		return
 	}
 	if r.StatusCode != wantedStatusCode {
-		err = fmt.Errorf("failed to request (GET /events): expected %d, found %d", wantedStatusCode, r.StatusCode)
+		err = fmt.Errorf("failed to request (GET /events/:id): expected %d, found %d", wantedStatusCode, r.StatusCode)
 		return
 	}
 

@@ -9,10 +9,11 @@ import (
 	"github.com/tingtt/prc_hub_bench/infrastructure/externalapi/backend"
 )
 
-func addEvent(c *backend.Client, bearer string, b backend.PostEventsJSONRequestBody, wantedStatusCode int) (d time.Duration, err error) {
+func UsersGet(c *backend.Client, bearer string, wantedStatusCode int) (d time.Duration, err error) {
 	start := time.Now()
 
-	r, err := c.PostEvents(context.Background(), b,
+	r, err := c.GetUsers(
+		context.Background(),
 		func(ctx context.Context, req *http.Request) error {
 			req.Header.Add("Authorization", "Bearer "+bearer)
 			return nil
@@ -25,12 +26,12 @@ func addEvent(c *backend.Client, bearer string, b backend.PostEventsJSONRequestB
 		return
 	}
 	if r.StatusCode != wantedStatusCode {
-		err = fmt.Errorf("failed to request (POST /events): expected %d, found %d", wantedStatusCode, r.StatusCode)
+		err = fmt.Errorf("failed to request (GET /users): expected %d, found %d", wantedStatusCode, r.StatusCode)
 		return
 	}
 
 	// TODO: chceck response body
-	// b2, err := io.ReadAll(r.Body)
+	// b, err := io.ReadAll(r.Body)
 	// if err != nil {
 	// 	return
 	// }

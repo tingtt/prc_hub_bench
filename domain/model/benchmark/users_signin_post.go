@@ -10,7 +10,7 @@ import (
 	"github.com/tingtt/prc_hub_bench/infrastructure/externalapi/backend"
 )
 
-func signIn(c *backend.Client, b backend.LoginBody, wantedStatusCode int) (d time.Duration, token string, err error) {
+func UsersSignInPost(c *backend.Client, b backend.LoginBody, wantedStatusCode int) (d time.Duration, token string, err error) {
 	// Request
 	start := time.Now()
 	r, err := c.PostUsersSignIn(context.Background(), b)
