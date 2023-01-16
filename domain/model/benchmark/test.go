@@ -54,6 +54,21 @@ func TestEndpoints(c *backend.Client) error {
 	}
 	fmt.Printf("Success: GET /events/%s\n\tevent: %+v\n", eventId, event)
 
+	documents, err := eventsIdDocumentsGet(c, TOKEN, eventId, backend.GetEventsIdDocumentsParams{}, http.StatusOK)
+	if err != nil {
+		fmt.Printf("Failed: GET /events/%s/documents\n\terr: %v\n", eventId, err)
+		return err
+	}
+	fmt.Printf("Success: GET /events/%s/documents\n\tdocuments[0]: %+v\n", eventId, documents[0])
+
+	var documentId string = string(documents[rand.Int63n(int64(len(documents)-1))].Id)
+	document, err := eventsIdDocumentsIdGet(c, TOKEN, eventId, documentId, http.StatusOK)
+	if err != nil {
+		fmt.Printf("Failed: GET /events/%s/documents/%s\n\terr: %v\n", eventId, documentId, err)
+		return err
+	}
+	fmt.Printf("Success: GET /events/%s/documents/%s\n\tdocument: %+v\n", eventId, documentId, document)
+
 	name := nameGenerator.Generate()
 	tmpBool := true
 	event2, err := eventsPost(c,

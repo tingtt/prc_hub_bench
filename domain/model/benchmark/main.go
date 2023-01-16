@@ -46,7 +46,7 @@ func Run(c *backend.Client, d time.Duration, o struct{ Verbose bool }) (r Result
 	)
 	nameGenerator := namegenerator.NewNameGenerator(time.Now().UTC().UnixNano())
 
-	var USER_ID, EVENT_ID string
+	var USER_ID, EVENT_ID, DOCUMENT_ID string
 	events, d2, err := EventsGet(c, backend.GetEventsParams{}, http.StatusOK)
 	if err != nil {
 		r.Error = err.Error()
@@ -65,6 +65,16 @@ func Run(c *backend.Client, d time.Duration, o struct{ Verbose bool }) (r Result
 	USER_ID = string(users[rand.Int63n(int64(len(users)-1))].Id)
 	r.Logs = append(r.Logs, Log{
 		"GET /events",
+		fmt.Sprintf("%d ms", d2.Abs().Milliseconds())},
+	)
+	documents, d2, err := EventsIdDocumentsGet(c, TOKEN, EVENT_ID, backend.GetEventsIdDocumentsParams{}, http.StatusOK)
+	if err != nil {
+		r.Error = err.Error()
+		return
+	}
+	DOCUMENT_ID = string(documents[rand.Int63n(int64(len(documents)-1))].Id)
+	r.Logs = append(r.Logs, Log{
+		"GET /events/:id/documents",
 		fmt.Sprintf("%d ms", d2.Abs().Milliseconds())},
 	)
 
@@ -94,6 +104,26 @@ func Run(c *backend.Client, d time.Duration, o struct{ Verbose bool }) (r Result
 			Point: 5,
 		},
 		req{
+			Name: "GET /events?embed=uesr&embed=documents",
+			Req: func() (time.Duration, error) {
+				events, d, err := EventsGet(c,
+					backend.GetEventsParams{
+						Location: (func() *string { s := "online"; return &s })(),
+						Embed:    &[]string{"user", "documents"},
+					},
+					http.StatusOK,
+				)
+				if len(events) != 2000 {
+					return d, fmt.Errorf("invalid event count. want: 2000, caught: %d", len(events))
+				}
+				if err == nil {
+					EVENT_ID = string(events[rand.Int63n(int64(len(events)-1))].Id)
+				}
+				return d, err
+			},
+			Point: 8,
+		},
+		req{
 			Name: "GET /events/:id?embed=uesr&embed=documents",
 			Req: func() (time.Duration, error) {
 				return EventsIdGet(c,
@@ -105,6 +135,55 @@ func Run(c *backend.Client, d time.Duration, o struct{ Verbose bool }) (r Result
 				)
 			},
 			Point: 5,
+		},
+		req{
+			Name: "GET /events/:id/documents",
+			Req: func() (time.Duration, error) {
+				documents, d, err := EventsIdDocumentsGet(c,
+					TOKEN,
+					EVENT_ID,
+					backend.GetEventsIdDocumentsParams{},
+					http.StatusOK,
+				)
+				if err == nil {
+					DOCUMENT_ID = string(documents[rand.Int63n(int64(len(documents)-1))].Id)
+				}
+				return d, err
+			},
+			Point: 5,
+		},
+		req{
+			Name: "GET /events/:id/documents?name=",
+			Req: func() (time.Duration, error) {
+				documents, d, err := EventsIdDocumentsGet(c,
+					TOKEN,
+					EVENT_ID,
+					backend.GetEventsIdDocumentsParams{
+						Name: (func() *string { s := ""; return &s })(),
+					},
+					http.StatusOK,
+				)
+				if err == nil && len(documents) != 0 {
+					DOCUMENT_ID = string(documents[rand.Int63n(int64(len(documents)-1))].Id)
+				}
+				if len(documents) != 0 {
+					return d, fmt.Errorf("invalid document count. want: 0, caught: %d", len(documents))
+				}
+				return d, err
+			},
+			Point: 6,
+		},
+		req{
+			Name: "GET /events/:id/documents/:document_id",
+			Req: func() (time.Duration, error) {
+				return EventsIdDocumentsIdGet(c,
+					TOKEN,
+					EVENT_ID,
+					DOCUMENT_ID,
+					http.StatusOK,
+				)
+			},
+			Point: 2,
 		},
 		req{
 			Name: "POST /events",
