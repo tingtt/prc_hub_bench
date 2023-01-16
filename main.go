@@ -17,6 +17,7 @@ type options struct {
 	Target       string `short:"t" long:"target" description:"Benchmark target" default:"http://localhost:1323"`
 	OutputFormat string `short:"o" long:"output" description:"Output format" default:"json"`
 	Verbose      bool   `short:"v" long:"verbose"`
+	TestMode     bool   `long:"test"`
 }
 
 func main() {
@@ -54,10 +55,17 @@ func main() {
 		fmt.Println(string(b))
 		os.Exit(1)
 	}
-	r := benchmark.Run(c, time.Minute, struct{ Verbose bool }{Verbose: opts.Verbose})
-	b, _ := marshaler.Marshal(r)
-	fmt.Println(string(b))
-	if r.Error != "" {
-		os.Exit(1)
+	if !opts.TestMode {
+		r := benchmark.Run(c, time.Minute, struct{ Verbose bool }{Verbose: opts.Verbose})
+		b, _ := marshaler.Marshal(r)
+		fmt.Println(string(b))
+		if r.Error != "" {
+			os.Exit(1)
+		}
+	} else {
+		err := benchmark.TestEndpoints(c)
+		if err != nil {
+			os.Exit(1)
+		}
 	}
 }

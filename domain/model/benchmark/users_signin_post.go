@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"strconv"
 	"time"
 
 	"github.com/tingtt/prc_hub_bench/infrastructure/externalapi/backend"
@@ -36,4 +37,36 @@ func UsersSignInPost(c *backend.Client, b backend.LoginBody, wantedStatusCode in
 		return
 	}
 	return d, t.Token, nil
+}
+
+func usersSignInPost(c *backend.Client, b backend.LoginBody, wantedStatusCode int) (token string, err error) {
+	// Request
+	r, err := c.PostUsersSignIn(context.Background(), b)
+	// Check status code
+	if err != nil {
+		return
+	}
+	if r.StatusCode != wantedStatusCode {
+		err = fmt.Errorf("failed to request (POST /users/sign_in): expected %d, found %d", wantedStatusCode, r.StatusCode)
+		return
+	}
+
+	// Read body
+	b2, err := io.ReadAll(r.Body)
+	if err != nil {
+		return
+	}
+	t := &backend.Token{}
+	err = json.Unmarshal(b2, t)
+	if err != nil {
+		return
+	}
+
+	// log response
+	err = writeFile("./.log/users_sign_in_POST_"+strconv.Itoa(r.StatusCode)+".json", b2)
+	if err != nil {
+		return
+	}
+
+	return t.Token, nil
 }
