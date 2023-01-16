@@ -5,17 +5,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"math/rand"
 	"strconv"
 	"time"
 
 	"github.com/tingtt/prc_hub_bench/infrastructure/externalapi/backend"
 )
 
-func UsersIdStarPost(c *backend.Client, userId int64, wantedStatusCode int) (d time.Duration, err error) {
+func UsersIdStarPost(c *backend.Client, userId string, wantedStatusCode int) (d time.Duration, err error) {
 	start := time.Now()
 
-	r, err := c.PostUsersIdStar(context.Background(), rand.Int63n(99)+1)
+	r, err := c.PostUsersIdStar(context.Background(), userId)
 
 	d = time.Since(start)
 
@@ -42,16 +41,12 @@ func UsersIdStarPost(c *backend.Client, userId int64, wantedStatusCode int) (d t
 	return
 }
 
-func usersIdStarPost(c *backend.Client, userId int64, wantedStatusCode int) (
+func usersIdStarPost(c *backend.Client, userId string, wantedStatusCode int) (
 	count StarCount,
 	err error,
 ) {
-	r, err := c.PostUsersIdStar(context.Background(), rand.Int63n(99)+1)
+	r, err := c.PostUsersIdStar(context.Background(), userId)
 	if err != nil {
-		return
-	}
-	if r.StatusCode != wantedStatusCode {
-		err = fmt.Errorf("failed to request (POST /users/:id/star): expected %d, found %d", wantedStatusCode, r.StatusCode)
 		return
 	}
 
@@ -62,6 +57,12 @@ func usersIdStarPost(c *backend.Client, userId int64, wantedStatusCode int) (
 	}
 	err = writeFile("./.log/users_id_start_POST_"+strconv.Itoa(r.StatusCode)+".json", b)
 	if err != nil {
+		return
+	}
+
+	// Check status code
+	if r.StatusCode != wantedStatusCode {
+		err = fmt.Errorf("failed to request (POST /users/:id/star): expected %d, found %d", wantedStatusCode, r.StatusCode)
 		return
 	}
 

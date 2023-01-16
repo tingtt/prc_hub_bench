@@ -61,10 +61,6 @@ func eventsPost(c *backend.Client, bearer string, b backend.PostEventsJSONReques
 	if err != nil {
 		return
 	}
-	if r.StatusCode != wantedStatusCode {
-		err = fmt.Errorf("failed to request (POST /events): expected %d, found %d", wantedStatusCode, r.StatusCode)
-		return
-	}
 
 	// log response
 	b2, err := io.ReadAll(r.Body)
@@ -73,6 +69,12 @@ func eventsPost(c *backend.Client, bearer string, b backend.PostEventsJSONReques
 	}
 	err = writeFile("./.log/events_POST_"+strconv.Itoa(r.StatusCode)+".json", b2)
 	if err != nil {
+		return
+	}
+
+	// Check status code
+	if r.StatusCode != wantedStatusCode {
+		err = fmt.Errorf("failed to request (POST /events): expected %d, found %d", wantedStatusCode, r.StatusCode)
 		return
 	}
 

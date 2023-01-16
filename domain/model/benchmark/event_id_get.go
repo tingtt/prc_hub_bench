@@ -11,7 +11,7 @@ import (
 	"github.com/tingtt/prc_hub_bench/infrastructure/externalapi/backend"
 )
 
-func EventsIdGet(c *backend.Client, id int64, p backend.GetEventsIdParams, wantedStatusCode int) (d time.Duration, err error) {
+func EventsIdGet(c *backend.Client, id string, p backend.GetEventsIdParams, wantedStatusCode int) (d time.Duration, err error) {
 	start := time.Now()
 
 	r, err := c.GetEventsId(
@@ -49,17 +49,13 @@ func EventsIdGet(c *backend.Client, id int64, p backend.GetEventsIdParams, wante
 	return
 }
 
-func eventsIdGet(c *backend.Client, id int64, p backend.GetEventsIdParams, wantedStatusCode int) (event EventEmbed, err error) {
+func eventsIdGet(c *backend.Client, id string, p backend.GetEventsIdParams, wantedStatusCode int) (event EventEmbed, err error) {
 	r, err := c.GetEventsId(
 		context.Background(),
 		id,
 		&p,
 	)
 	if err != nil {
-		return
-	}
-	if r.StatusCode != wantedStatusCode {
-		err = fmt.Errorf("failed to request (GET /events/:id): expected %d, found %d", wantedStatusCode, r.StatusCode)
 		return
 	}
 
@@ -70,6 +66,12 @@ func eventsIdGet(c *backend.Client, id int64, p backend.GetEventsIdParams, wante
 	}
 	err = writeFile("./.log/events_id_GET_"+strconv.Itoa(r.StatusCode)+".json", b)
 	if err != nil {
+		return
+	}
+
+	// Check status code
+	if r.StatusCode != wantedStatusCode {
+		err = fmt.Errorf("failed to request (GET /events/:id): expected %d, found %d", wantedStatusCode, r.StatusCode)
 		return
 	}
 

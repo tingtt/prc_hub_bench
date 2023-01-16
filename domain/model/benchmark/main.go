@@ -46,6 +46,28 @@ func Run(c *backend.Client, d time.Duration, o struct{ Verbose bool }) (r Result
 	)
 	nameGenerator := namegenerator.NewNameGenerator(time.Now().UTC().UnixNano())
 
+	var USER_ID, EVENT_ID string
+	events, d2, err := EventsGet(c, backend.GetEventsParams{}, http.StatusOK)
+	if err != nil {
+		r.Error = err.Error()
+		return
+	}
+	EVENT_ID = string(events[rand.Int63n(int64(len(events)-1))].Id)
+	r.Logs = append(r.Logs, Log{
+		"GET /events",
+		fmt.Sprintf("%d ms", d2.Abs().Milliseconds())},
+	)
+	users, d2, err := UsersGet(c, TOKEN, http.StatusOK)
+	if err != nil {
+		r.Error = err.Error()
+		return
+	}
+	USER_ID = string(users[rand.Int63n(int64(len(users)-1))].Id)
+	r.Logs = append(r.Logs, Log{
+		"GET /events",
+		fmt.Sprintf("%d ms", d2.Abs().Milliseconds())},
+	)
+
 	multiRequests(&r, d, o,
 		req{
 			Name: "POST /users/sign_in",
@@ -58,12 +80,16 @@ func Run(c *backend.Client, d time.Duration, o struct{ Verbose bool }) (r Result
 		req{
 			Name: "GET /events?embed=uesr&embed=documents",
 			Req: func() (time.Duration, error) {
-				return EventsGet(c,
+				events, d, err := EventsGet(c,
 					backend.GetEventsParams{
 						Embed: &[]string{"user", "documents"},
 					},
 					http.StatusOK,
 				)
+				if err == nil {
+					EVENT_ID = string(events[rand.Int63n(int64(len(events)-1))].Id)
+				}
+				return d, err
 			},
 			Point: 5,
 		},
@@ -71,7 +97,7 @@ func Run(c *backend.Client, d time.Duration, o struct{ Verbose bool }) (r Result
 			Name: "GET /events/:id?embed=uesr&embed=documents",
 			Req: func() (time.Duration, error) {
 				return EventsIdGet(c,
-					rand.Int63n(99)+1,
+					EVENT_ID,
 					backend.GetEventsIdParams{
 						Embed: &[]string{"user", "documents"},
 					},
@@ -111,14 +137,25 @@ func Run(c *backend.Client, d time.Duration, o struct{ Verbose bool }) (r Result
 		req{
 			Name: "GET /users",
 			Req: func() (time.Duration, error) {
-				return UsersGet(c, TOKEN, http.StatusOK)
+				users, d, err := UsersGet(c, TOKEN, http.StatusOK)
+				if err == nil {
+					USER_ID = string(users[rand.Int63n(int64(len(users)-1))].Id)
+				}
+				return d, err
 			},
 			Point: 5,
 		},
 		req{
+			Name: "GET /users/:id",
+			Req: func() (time.Duration, error) {
+				return UsersIdGet(c, USER_ID, TOKEN, http.StatusOK)
+			},
+			Point: 3,
+		},
+		req{
 			Name: "POST /users/:id/star",
 			Req: func() (time.Duration, error) {
-				return UsersIdStarPost(c, rand.Int63n(99)+1, http.StatusOK)
+				return UsersIdStarPost(c, USER_ID, http.StatusOK)
 			},
 			Point: 3,
 		},

@@ -12,11 +12,12 @@ import (
 	"github.com/tingtt/prc_hub_bench/infrastructure/externalapi/backend"
 )
 
-func UsersGet(c *backend.Client, bearer string, wantedStatusCode int) (users []User, d time.Duration, err error) {
+func UsersIdGet(c *backend.Client, id string, bearer string, wantedStatusCode int) (d time.Duration, err error) {
 	start := time.Now()
 
-	r, err := c.GetUsers(
+	r, err := c.GetUsersId(
 		context.Background(),
+		id,
 		func(ctx context.Context, req *http.Request) error {
 			req.Header.Add("Authorization", "Bearer "+bearer)
 			return nil
@@ -38,11 +39,12 @@ func UsersGet(c *backend.Client, bearer string, wantedStatusCode int) (users []U
 	if err != nil {
 		return
 	}
-	err = json.Unmarshal(b, &users)
+	user := User{}
+	err = json.Unmarshal(b, &user)
 	if err != nil {
 		return
 	}
-	err = users[0].validate()
+	err = user.validate()
 	if err != nil {
 		return
 	}
@@ -50,9 +52,10 @@ func UsersGet(c *backend.Client, bearer string, wantedStatusCode int) (users []U
 	return
 }
 
-func usersGet(c *backend.Client, bearer string, wantedStatusCode int) (users []User, err error) {
-	r, err := c.GetUsers(
+func usersIdGet(c *backend.Client, id string, bearer string, wantedStatusCode int) (user User, err error) {
+	r, err := c.GetUsersId(
 		context.Background(),
+		id,
 		func(ctx context.Context, req *http.Request) error {
 			req.Header.Add("Authorization", "Bearer "+bearer)
 			return nil
@@ -67,23 +70,23 @@ func usersGet(c *backend.Client, bearer string, wantedStatusCode int) (users []U
 	if err != nil {
 		return
 	}
-	err = writeFile("./.log/users_GET_"+strconv.Itoa(r.StatusCode)+".json", b)
+	err = writeFile("./.log/users_id_GET_"+strconv.Itoa(r.StatusCode)+".json", b)
 	if err != nil {
 		return
 	}
 
 	// Check status code
 	if r.StatusCode != wantedStatusCode {
-		err = fmt.Errorf("failed to request (GET /users): expected %d, found %d", wantedStatusCode, r.StatusCode)
+		err = fmt.Errorf("failed to request (GET /users/:id): expected %d, found %d", wantedStatusCode, r.StatusCode)
 		return
 	}
 
 	// Unmarshal
-	err = json.Unmarshal(b, &users)
+	err = json.Unmarshal(b, &user)
 	if err != nil {
 		return
 	}
-	err = users[0].validate()
+	err = user.validate()
 	if err != nil {
 		return
 	}

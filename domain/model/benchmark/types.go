@@ -3,6 +3,7 @@ package benchmark
 import (
 	"encoding/json"
 	"errors"
+	"strconv"
 	"time"
 )
 
@@ -11,12 +12,12 @@ type Id string
 func (id *Id) UnmarshalJSON(b []byte) error {
 	var num int64
 	if err1 := json.Unmarshal(b, &num); err1 == nil {
-		*id = Id(string(rune(num)))
+		*id = Id(strconv.FormatInt(num, 10))
 		return nil
 	}
 	var str string
 	if err1 := json.Unmarshal(b, &str); err1 == nil {
-		*id = Id(rune(num))
+		*id = Id(num)
 		return nil
 	} else {
 		return err1

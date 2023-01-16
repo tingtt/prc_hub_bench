@@ -40,18 +40,19 @@ func TestEndpoints(c *backend.Client) error {
 	}
 	fmt.Printf("Success: GET /events\n\tevents[0]: %+v\n", events[0])
 
+	var eventId string = string(events[rand.Int63n(int64(len(events)-1))].Id)
 	event, err := eventsIdGet(c,
-		rand.Int63n(99)+1,
+		eventId,
 		backend.GetEventsIdParams{
 			Embed: &[]string{"user", "documents"},
 		},
 		http.StatusOK,
 	)
 	if err != nil {
-		fmt.Printf("Failed: GET /events/{id}\n\terr: %v\n", err)
+		fmt.Printf("Failed: GET /events/%s\n\terr: %v\n", eventId, err)
 		return err
 	}
-	fmt.Printf("Success: GET /events/{id}\n\tevent: %+v\n", event)
+	fmt.Printf("Success: GET /events/%s\n\tevent: %+v\n", eventId, event)
 
 	name := nameGenerator.Generate()
 	tmpBool := true
@@ -88,12 +89,20 @@ func TestEndpoints(c *backend.Client) error {
 	}
 	fmt.Printf("Success: GET /users\n\tusers[0]: %+v\n", users[0])
 
-	count, err := usersIdStarPost(c, rand.Int63n(99)+1, http.StatusOK)
+	userId := string(users[rand.Int63n(int64(len(users)-1))].Id)
+	user, err := usersIdGet(c, userId, TOKEN, http.StatusOK)
 	if err != nil {
-		fmt.Printf("Failed: POST /users/{id}/star\n\terr: %v\n", err)
+		fmt.Printf("Failed: GET /users/%s\n\terr: %v\n", userId, err)
 		return err
 	}
-	fmt.Printf("Success: POST /users/{id}/star\n\tcount: %+v\n", count)
+	fmt.Printf("Success: GET /users/%s\n\tuser: %+v\n", userId, user)
+
+	count, err := usersIdStarPost(c, userId, http.StatusOK)
+	if err != nil {
+		fmt.Printf("Failed: POST /users/%s/star\n\terr: %v\n", userId, err)
+		return err
+	}
+	fmt.Printf("Success: POST /users/%s/star\n\tcount: %+v\n", userId, count)
 
 	return nil
 }

@@ -48,7 +48,7 @@ type Event struct {
 	Datetimes   []EventDatetime  `json:"datetimes"`
 	Description *string          `json:"description,omitempty"`
 	Documents   *[]EventDocument `json:"documents,omitempty"`
-	Id          int64            `json:"id"`
+	Id          string           `json:"id"`
 	Location    *string          `json:"location,omitempty"`
 	Name        string           `json:"name"`
 	Published   bool             `json:"published"`
@@ -63,7 +63,7 @@ type EventDatetime struct {
 
 // EventDocument defines model for EventDocument.
 type EventDocument struct {
-	Id   int64  `json:"id"`
+	Id   string `json:"id"`
 	Name string `json:"name"`
 	Url  string `json:"url"`
 }
@@ -111,7 +111,7 @@ type User struct {
 	Admin               bool                `json:"admin"`
 	Email               openapi_types.Email `json:"email"`
 	GithubUsername      *string             `json:"github_username,omitempty"`
-	Id                  int64               `json:"id"`
+	Id                  string              `json:"id"`
 	Manage              bool                `json:"manage"`
 	Name                string              `json:"name"`
 	PostEventAvailabled bool                `json:"post_event_availabled"`
@@ -124,7 +124,7 @@ type UserWithToken struct {
 	Admin               bool                `json:"admin"`
 	Email               openapi_types.Email `json:"email"`
 	GithubUsername      *string             `json:"github_username,omitempty"`
-	Id                  int64               `json:"id"`
+	Id                  string              `json:"id"`
 	Name                string              `json:"name"`
 	PostEventAvailabled bool                `json:"post_event_availabled"`
 	Token               string              `json:"token"`
@@ -132,13 +132,13 @@ type UserWithToken struct {
 }
 
 // DocumentId defines model for document_id.
-type DocumentId = int64
+type DocumentId = string
 
 // Embed defines model for embed.
 type Embed = []string
 
 // Id defines model for id.
-type Id = int64
+type Id = string
 
 // Location defines model for location.
 type Location = string

@@ -11,7 +11,7 @@ import (
 	"github.com/tingtt/prc_hub_bench/infrastructure/externalapi/backend"
 )
 
-func EventsGet(c *backend.Client, p backend.GetEventsParams, wantedStatusCode int) (d time.Duration, err error) {
+func EventsGet(c *backend.Client, p backend.GetEventsParams, wantedStatusCode int) (events []EventEmbed, d time.Duration, err error) {
 	start := time.Now()
 
 	r, err := c.GetEvents(
@@ -35,14 +35,31 @@ func EventsGet(c *backend.Client, p backend.GetEventsParams, wantedStatusCode in
 		return
 	}
 	// Unmarshal
-	events := []EventEmbed{}
 	err = json.Unmarshal(b, &events)
 	if err != nil {
 		return
 	}
-	err = events[0].validate()
+	err = events[0].Event.validate()
 	if err != nil {
 		return
+	}
+	if p.Embed != nil {
+		for _, v := range *p.Embed {
+			if v == "user" {
+				err = events[0].validate()
+				if err != nil {
+					return
+				}
+			}
+			if v == "documents" {
+				for _, ed := range events[0].Documents {
+					err = ed.validate()
+					if err != nil {
+						return
+					}
+				}
+			}
+		}
 	}
 
 	return
@@ -56,10 +73,6 @@ func eventsGet(c *backend.Client, p backend.GetEventsParams, wantedStatusCode in
 	if err != nil {
 		return
 	}
-	if r.StatusCode != wantedStatusCode {
-		err = fmt.Errorf("failed to request (GET /events): expected %d, found %d", wantedStatusCode, r.StatusCode)
-		return
-	}
 
 	// log response
 	b, err := io.ReadAll(r.Body)
@@ -68,6 +81,12 @@ func eventsGet(c *backend.Client, p backend.GetEventsParams, wantedStatusCode in
 	}
 	err = writeFile("./.log/events_GET_"+strconv.Itoa(r.StatusCode)+".json", b)
 	if err != nil {
+		return
+	}
+
+	// Check status code
+	if r.StatusCode != wantedStatusCode {
+		err = fmt.Errorf("failed to request (GET /events): expected %d, found %d", wantedStatusCode, r.StatusCode)
 		return
 	}
 

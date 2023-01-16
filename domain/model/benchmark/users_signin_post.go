@@ -46,10 +46,6 @@ func usersSignInPost(c *backend.Client, b backend.LoginBody, wantedStatusCode in
 	if err != nil {
 		return
 	}
-	if r.StatusCode != wantedStatusCode {
-		err = fmt.Errorf("failed to request (POST /users/sign_in): expected %d, found %d", wantedStatusCode, r.StatusCode)
-		return
-	}
 
 	// Read body
 	b2, err := io.ReadAll(r.Body)
@@ -65,6 +61,12 @@ func usersSignInPost(c *backend.Client, b backend.LoginBody, wantedStatusCode in
 	// log response
 	err = writeFile("./.log/users_sign_in_POST_"+strconv.Itoa(r.StatusCode)+".json", b2)
 	if err != nil {
+		return
+	}
+
+	// Check status code
+	if r.StatusCode != wantedStatusCode {
+		err = fmt.Errorf("failed to request (POST /users/sign_in): expected %d, found %d", wantedStatusCode, r.StatusCode)
 		return
 	}
 
