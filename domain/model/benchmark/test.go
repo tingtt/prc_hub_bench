@@ -1,9 +1,12 @@
 package benchmark
 
 import (
+	"context"
 	"fmt"
+	"log"
 	"math/rand"
 	"net/http"
+	"net/http/httptrace"
 	"time"
 
 	"github.com/goombaio/namegenerator"
@@ -11,7 +14,15 @@ import (
 )
 
 func TestEndpoints(c *backend.Client) error {
-	_, err := ResetPost(c)
+	// client trace to log whether the request's underlying tcp connection was re-used
+	ctx := httptrace.WithClientTrace(
+		context.Background(),
+		&httptrace.ClientTrace{
+			GotConn: func(info httptrace.GotConnInfo) { log.Printf("conn was reused: %t", info.Reused) },
+		},
+	)
+
+	_, err := ResetPost(c, ctx)
 	if err != nil {
 		return err
 	}

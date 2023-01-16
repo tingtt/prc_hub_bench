@@ -12,11 +12,11 @@ import (
 	"github.com/tingtt/prc_hub_bench/infrastructure/externalapi/backend"
 )
 
-func UsersGet(c *backend.Client, bearer string, wantedStatusCode int) (users []User, d time.Duration, err error) {
+func UsersGet(c *backend.Client, ctx context.Context, bearer string, wantedStatusCode int) (users []User, d time.Duration, err error) {
 	start := time.Now()
 
 	r, err := c.GetUsers(
-		context.Background(),
+		ctx,
 		func(ctx context.Context, req *http.Request) error {
 			req.Header.Add("Authorization", "Bearer "+bearer)
 			return nil

@@ -11,11 +11,11 @@ import (
 	"github.com/tingtt/prc_hub_bench/infrastructure/externalapi/backend"
 )
 
-func EventsIdGet(c *backend.Client, id string, p backend.GetEventsIdParams, wantedStatusCode int) (d time.Duration, err error) {
+func EventsIdGet(c *backend.Client, ctx context.Context, id string, p backend.GetEventsIdParams, wantedStatusCode int) (d time.Duration, err error) {
 	start := time.Now()
 
 	r, err := c.GetEventsId(
-		context.Background(),
+		ctx,
 		id,
 		&p,
 	)

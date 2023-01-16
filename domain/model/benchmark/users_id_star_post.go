@@ -11,10 +11,10 @@ import (
 	"github.com/tingtt/prc_hub_bench/infrastructure/externalapi/backend"
 )
 
-func UsersIdStarPost(c *backend.Client, userId string, wantedStatusCode int) (d time.Duration, err error) {
+func UsersIdStarPost(c *backend.Client, ctx context.Context, userId string, wantedStatusCode int) (d time.Duration, err error) {
 	start := time.Now()
 
-	r, err := c.PostUsersIdStar(context.Background(), userId)
+	r, err := c.PostUsersIdStar(ctx, userId)
 
 	d = time.Since(start)
 

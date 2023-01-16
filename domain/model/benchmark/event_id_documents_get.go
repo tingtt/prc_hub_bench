@@ -12,11 +12,11 @@ import (
 	"github.com/tingtt/prc_hub_bench/infrastructure/externalapi/backend"
 )
 
-func EventsIdDocumentsGet(c *backend.Client, bearer string, id string, p backend.GetEventsIdDocumentsParams, wantedStatusCode int) (documents []EventDocument, d time.Duration, err error) {
+func EventsIdDocumentsGet(c *backend.Client, ctx context.Context, bearer string, id string, p backend.GetEventsIdDocumentsParams, wantedStatusCode int) (documents []EventDocument, d time.Duration, err error) {
 	start := time.Now()
 
 	r, err := c.GetEventsIdDocuments(
-		context.Background(),
+		ctx,
 		id,
 		&p,
 		func(ctx context.Context, req *http.Request) error {

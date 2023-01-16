@@ -1,9 +1,11 @@
 package benchmark
 
 import (
+	"context"
 	"fmt"
 	"math/rand"
 	"net/http"
+	"net/http/httptrace"
 	"time"
 
 	"github.com/tingtt/prc_hub_bench/infrastructure/externalapi/backend"
@@ -23,7 +25,13 @@ type Log struct {
 }
 
 func Run(c *backend.Client, d time.Duration, o struct{ Verbose bool }) (r Result) {
-	d2, err := ResetPost(c)
+	// client trace to log whether the request's underlying tcp connection was re-used
+	ctx := httptrace.WithClientTrace(
+		context.Background(),
+		&httptrace.ClientTrace{},
+	)
+
+	d2, err := ResetPost(c, ctx)
 	if err != nil {
 		r.Error = err.Error()
 		return
@@ -35,7 +43,7 @@ func Run(c *backend.Client, d time.Duration, o struct{ Verbose bool }) (r Result
 
 	LOGIN_USER := backend.LoginBody{Email: "throbbing-pond@prchub.com", Password: "throbbing-pond"}
 	var TOKEN string
-	d2, TOKEN, err = UsersSignInPost(c, LOGIN_USER, 200)
+	d2, TOKEN, err = UsersSignInPost(c, ctx, LOGIN_USER, 200)
 	if err != nil {
 		r.Error = err.Error()
 		return
@@ -47,7 +55,7 @@ func Run(c *backend.Client, d time.Duration, o struct{ Verbose bool }) (r Result
 	nameGenerator := namegenerator.NewNameGenerator(time.Now().UTC().UnixNano())
 
 	var USER_ID, EVENT_ID, DOCUMENT_ID string
-	events, d2, err := EventsGet(c, backend.GetEventsParams{}, http.StatusOK)
+	events, d2, err := EventsGet(c, ctx, backend.GetEventsParams{}, http.StatusOK)
 	if err != nil {
 		r.Error = err.Error()
 		return
@@ -57,7 +65,7 @@ func Run(c *backend.Client, d time.Duration, o struct{ Verbose bool }) (r Result
 		"GET /events",
 		fmt.Sprintf("%d ms", d2.Abs().Milliseconds())},
 	)
-	users, d2, err := UsersGet(c, TOKEN, http.StatusOK)
+	users, d2, err := UsersGet(c, ctx, TOKEN, http.StatusOK)
 	if err != nil {
 		r.Error = err.Error()
 		return
@@ -67,7 +75,7 @@ func Run(c *backend.Client, d time.Duration, o struct{ Verbose bool }) (r Result
 		"GET /events",
 		fmt.Sprintf("%d ms", d2.Abs().Milliseconds())},
 	)
-	documents, d2, err := EventsIdDocumentsGet(c, TOKEN, EVENT_ID, backend.GetEventsIdDocumentsParams{}, http.StatusOK)
+	documents, d2, err := EventsIdDocumentsGet(c, ctx, TOKEN, EVENT_ID, backend.GetEventsIdDocumentsParams{}, http.StatusOK)
 	if err != nil {
 		r.Error = err.Error()
 		return
@@ -82,7 +90,7 @@ func Run(c *backend.Client, d time.Duration, o struct{ Verbose bool }) (r Result
 		req{
 			Name: "POST /users/sign_in",
 			Req: func() (d time.Duration, err error) {
-				d, TOKEN, err = UsersSignInPost(c, LOGIN_USER, 200)
+				d, TOKEN, err = UsersSignInPost(c, ctx, LOGIN_USER, 200)
 				return d, err
 			},
 			Point: 2,
@@ -90,7 +98,7 @@ func Run(c *backend.Client, d time.Duration, o struct{ Verbose bool }) (r Result
 		req{
 			Name: "GET /events?embed=uesr&embed=documents",
 			Req: func() (time.Duration, error) {
-				events, d, err := EventsGet(c,
+				events, d, err := EventsGet(c, ctx,
 					backend.GetEventsParams{
 						Embed: &[]string{"user", "documents"},
 					},
@@ -106,7 +114,7 @@ func Run(c *backend.Client, d time.Duration, o struct{ Verbose bool }) (r Result
 		req{
 			Name: "GET /events?embed=uesr&embed=documents",
 			Req: func() (time.Duration, error) {
-				events, d, err := EventsGet(c,
+				events, d, err := EventsGet(c, ctx,
 					backend.GetEventsParams{
 						Location: (func() *string { s := "online"; return &s })(),
 						Embed:    &[]string{"user", "documents"},
@@ -126,7 +134,7 @@ func Run(c *backend.Client, d time.Duration, o struct{ Verbose bool }) (r Result
 		req{
 			Name: "GET /events/:id?embed=uesr&embed=documents",
 			Req: func() (time.Duration, error) {
-				return EventsIdGet(c,
+				return EventsIdGet(c, ctx,
 					EVENT_ID,
 					backend.GetEventsIdParams{
 						Embed: &[]string{"user", "documents"},
@@ -139,7 +147,7 @@ func Run(c *backend.Client, d time.Duration, o struct{ Verbose bool }) (r Result
 		req{
 			Name: "GET /events/:id/documents",
 			Req: func() (time.Duration, error) {
-				documents, d, err := EventsIdDocumentsGet(c,
+				documents, d, err := EventsIdDocumentsGet(c, ctx,
 					TOKEN,
 					EVENT_ID,
 					backend.GetEventsIdDocumentsParams{},
@@ -155,7 +163,7 @@ func Run(c *backend.Client, d time.Duration, o struct{ Verbose bool }) (r Result
 		req{
 			Name: "GET /events/:id/documents?name=",
 			Req: func() (time.Duration, error) {
-				documents, d, err := EventsIdDocumentsGet(c,
+				documents, d, err := EventsIdDocumentsGet(c, ctx,
 					TOKEN,
 					EVENT_ID,
 					backend.GetEventsIdDocumentsParams{
@@ -176,7 +184,7 @@ func Run(c *backend.Client, d time.Duration, o struct{ Verbose bool }) (r Result
 		req{
 			Name: "GET /events/:id/documents/:document_id",
 			Req: func() (time.Duration, error) {
-				return EventsIdDocumentsIdGet(c,
+				return EventsIdDocumentsIdGet(c, ctx,
 					TOKEN,
 					EVENT_ID,
 					DOCUMENT_ID,
@@ -190,7 +198,7 @@ func Run(c *backend.Client, d time.Duration, o struct{ Verbose bool }) (r Result
 			Req: func() (time.Duration, error) {
 				name := nameGenerator.Generate()
 				tmpBool := true
-				return EventsPost(c,
+				return EventsPost(c, ctx,
 					TOKEN,
 					backend.CreateEventBody{
 						Datetimes: &[]backend.CreateEventDatetime{{
@@ -216,7 +224,7 @@ func Run(c *backend.Client, d time.Duration, o struct{ Verbose bool }) (r Result
 		req{
 			Name: "GET /users",
 			Req: func() (time.Duration, error) {
-				users, d, err := UsersGet(c, TOKEN, http.StatusOK)
+				users, d, err := UsersGet(c, ctx, TOKEN, http.StatusOK)
 				if err == nil {
 					USER_ID = string(users[rand.Int63n(int64(len(users)-1))].Id)
 				}
@@ -227,14 +235,14 @@ func Run(c *backend.Client, d time.Duration, o struct{ Verbose bool }) (r Result
 		req{
 			Name: "GET /users/:id",
 			Req: func() (time.Duration, error) {
-				return UsersIdGet(c, USER_ID, TOKEN, http.StatusOK)
+				return UsersIdGet(c, ctx, USER_ID, TOKEN, http.StatusOK)
 			},
 			Point: 3,
 		},
 		req{
 			Name: "POST /users/:id/star",
 			Req: func() (time.Duration, error) {
-				return UsersIdStarPost(c, USER_ID, http.StatusOK)
+				return UsersIdStarPost(c, ctx, USER_ID, http.StatusOK)
 			},
 			Point: 3,
 		},

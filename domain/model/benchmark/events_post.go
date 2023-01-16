@@ -12,10 +12,10 @@ import (
 	"github.com/tingtt/prc_hub_bench/infrastructure/externalapi/backend"
 )
 
-func EventsPost(c *backend.Client, bearer string, b backend.PostEventsJSONRequestBody, wantedStatusCode int) (d time.Duration, err error) {
+func EventsPost(c *backend.Client, ctx context.Context, bearer string, b backend.PostEventsJSONRequestBody, wantedStatusCode int) (d time.Duration, err error) {
 	start := time.Now()
 
-	r, err := c.PostEvents(context.Background(), b,
+	r, err := c.PostEvents(ctx, b,
 		func(ctx context.Context, req *http.Request) error {
 			req.Header.Add("Authorization", "Bearer "+bearer)
 			return nil
