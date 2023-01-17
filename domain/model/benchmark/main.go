@@ -105,6 +105,13 @@ func Run(c *backend.Client, d time.Duration, o struct{ Verbose bool }) (r Result
 		req{
 			Name: "GET /events?embed=uesr&embed=documents",
 			Req: func() (time.Duration, error) {
+				defer func() {
+					err := recover()
+					if err != nil {
+						r.Error = fmt.Sprint("recover: ", err)
+					}
+				}()
+
 				events, d, err := EventsGet(c, ctx,
 					backend.GetEventsParams{
 						Embed: &[]string{"user", "documents"},
@@ -121,6 +128,13 @@ func Run(c *backend.Client, d time.Duration, o struct{ Verbose bool }) (r Result
 		req{
 			Name: "GET /events?embed=uesr&embed=documents",
 			Req: func() (time.Duration, error) {
+				defer func() {
+					err := recover()
+					if err != nil {
+						r.Error = fmt.Sprint("recover: ", err)
+					}
+				}()
+
 				events, d, err := EventsGet(c, ctx,
 					backend.GetEventsParams{
 						Location: (func() *string { s := "online"; return &s })(),
@@ -154,6 +168,13 @@ func Run(c *backend.Client, d time.Duration, o struct{ Verbose bool }) (r Result
 		req{
 			Name: "GET /events/:id/documents",
 			Req: func() (time.Duration, error) {
+				defer func() {
+					err := recover()
+					if err != nil {
+						r.Error = fmt.Sprint("recover: ", err)
+					}
+				}()
+
 				documents, d, err := EventsIdDocumentsGet(c, ctx,
 					TOKEN,
 					EVENT_ID,
@@ -170,6 +191,13 @@ func Run(c *backend.Client, d time.Duration, o struct{ Verbose bool }) (r Result
 		req{
 			Name: "GET /events/:id/documents?name=",
 			Req: func() (time.Duration, error) {
+				defer func() {
+					err := recover()
+					if err != nil {
+						r.Error = fmt.Sprint("recover: ", err)
+					}
+				}()
+
 				documents, d, err := EventsIdDocumentsGet(c, ctx,
 					TOKEN,
 					EVENT_ID,
@@ -231,6 +259,13 @@ func Run(c *backend.Client, d time.Duration, o struct{ Verbose bool }) (r Result
 		req{
 			Name: "GET /users",
 			Req: func() (time.Duration, error) {
+				defer func() {
+					err := recover()
+					if err != nil {
+						r.Error = fmt.Sprint("recover: ", err)
+					}
+				}()
+
 				users, d, err := UsersGet(c, ctx, TOKEN, http.StatusOK)
 				if err == nil {
 					USER_ID = string(users[rand.Int63n(int64(len(users)-1))].Id)
