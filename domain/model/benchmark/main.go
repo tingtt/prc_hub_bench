@@ -25,6 +25,13 @@ type Log struct {
 }
 
 func Run(c *backend.Client, d time.Duration, o struct{ Verbose bool }) (r Result) {
+	defer func() {
+		err := recover()
+		if err != nil {
+			r.Error = fmt.Sprint("recover: ", err)
+		}
+	}()
+
 	// client trace to log whether the request's underlying tcp connection was re-used
 	ctx := httptrace.WithClientTrace(
 		context.Background(),
