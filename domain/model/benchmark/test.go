@@ -3,7 +3,6 @@ package benchmark
 import (
 	"context"
 	"fmt"
-	"log"
 	"math/rand"
 	"net/http"
 	"net/http/httptrace"
@@ -17,9 +16,7 @@ func TestEndpoints(c *backend.Client) error {
 	// client trace to log whether the request's underlying tcp connection was re-used
 	ctx := httptrace.WithClientTrace(
 		context.Background(),
-		&httptrace.ClientTrace{
-			GotConn: func(info httptrace.GotConnInfo) { log.Printf("conn was reused: %t", info.Reused) },
-		},
+		&httptrace.ClientTrace{},
 	)
 
 	_, err := ResetPost(c, ctx)

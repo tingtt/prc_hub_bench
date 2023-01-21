@@ -181,7 +181,7 @@ func Run(c *backend.Client, d time.Duration, o struct{ Verbose bool }) (r Result
 					backend.GetEventsIdDocumentsParams{},
 					http.StatusOK,
 				)
-				if err == nil {
+				if err == nil && len(documents) != 0 {
 					DOCUMENT_ID = string(documents[rand.Int63n(int64(len(documents)-1))].Id)
 				}
 				return d, err

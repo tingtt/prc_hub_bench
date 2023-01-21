@@ -69,6 +69,7 @@ func main() {
 	} else {
 		err := benchmark.TestEndpoints(c)
 		if err != nil {
+			fmt.Printf("err: %v\n", err)
 			os.Exit(1)
 		}
 	}
