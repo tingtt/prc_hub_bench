@@ -73,7 +73,7 @@ func eventsIdDocumentsIdGet(c *backend.Client, bearer string, eventId string, do
 	if err != nil {
 		return
 	}
-	err = writeFile("./.log/events_id_GET_"+strconv.Itoa(r.StatusCode)+".json", b)
+	err = writeFile("./.log/events_id_documents_id_GET_"+strconv.Itoa(r.StatusCode)+".json", b)
 	if err != nil {
 		return
 	}
