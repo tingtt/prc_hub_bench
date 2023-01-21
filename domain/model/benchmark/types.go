@@ -17,7 +17,7 @@ func (id *Id) UnmarshalJSON(b []byte) error {
 	}
 	var str string
 	if err1 := json.Unmarshal(b, &str); err1 == nil {
-		*id = Id(num)
+		*id = Id(str)
 		return nil
 	} else {
 		return err1
