@@ -319,7 +319,12 @@ func request(r *Result, d *time.Duration, req req, o struct{ Verbose bool }) {
 		fmt.Sprintf("%d ms", d2.Abs().Milliseconds()),
 	})
 	if o.Verbose {
-		fmt.Printf("%v\n", Log{req.Name, fmt.Sprintf("%d ms", d2.Abs().Milliseconds())})
+		fmt.Printf(
+			"Target: %s	Apptime: %d ms	TimeLeft: %d ms\n",
+			req.Name,
+			d2.Abs().Milliseconds(),
+			d.Abs().Milliseconds(),
+		)
 	}
 	// Add score point
 	r.Score += uint64(req.Point)
